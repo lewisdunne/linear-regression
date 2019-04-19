@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-# Generate a fake dataset
+#-Generate a fake dataset ----------------------------------------------------#
 data_n = 1000
 data_mean = 0
 data_stdv = 1
