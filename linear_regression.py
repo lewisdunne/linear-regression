@@ -5,8 +5,8 @@ import seaborn as sns
 
 # Generate a fake dataset
 data_n = 1000
-data_mean = 100
-data_stdv = 2
+data_mean = 0
+data_stdv = 1
 X = np.arange(1, data_n+1, 1)
 y = np.random.normal(data_mean, data_stdv, data_n)
 # Update y to give it a trend
