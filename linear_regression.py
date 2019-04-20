@@ -35,6 +35,21 @@ def linear_regression(X, y):
     
     return beta0, beta1
 
+# Alternatively:
+def regression(X, y):
+    '''
+    Vectorised solution for linear regression using the formula:
+        inverse(X'*X)*X'*y
+    '''
+    # Create a constant
+    constant = np.ones(len(X),1)
+    # Add the constant to the X input
+    Xmat = np.c_[constant, X]
+    # Solve beta parameters using vectorised regression equation
+    BETAS = np.linalg.inv(Xmat.T.dot(Xmat)).dot(Xmat.T).dot(y)
+    
+    return BETAS
+
 def predict_y(x, beta0, beta1):
     """
     Use params beta0 and beta1 to predict a hypothetical val of x.
