@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-#-Generate a fake dataset ----------------------------------------------------#
+# Generate a fake dataset
 data_n = 1000
 data_mean = 0
 data_stdv = 1
@@ -35,7 +35,6 @@ def linear_regression(X, y):
     
     return beta0, beta1
 
-# Alternatively:
 def regression(X, y):
     '''
     Vectorised solution for linear regression using the formula:
@@ -57,6 +56,10 @@ def predict_y(x, beta0, beta1):
     y = beta0 + beta1 * x
     return y
 
+def R_squared(y, predicted_y):
+    '''Calculate R-squared variance explained'''
+    return np.sum((predicted_y-np.mean(y))**2) / np.sum((y-np.mean(y))**2)
+
 #-Testing: Calculating -------------------------------------------------------#
 # Call the func
 b0, b1 = linear_regression(X, y)
@@ -64,8 +67,10 @@ b0, b1 = linear_regression(X, y)
 # Make line
 max_pred = max(X)
 min_pred = min(X)
-linex = np.arange(min_pred, max_pred, 1) # x values
+linex = np.arange(min_pred, max_pred+1, 1) # x values
 liney = [predict_y(x, b0, b1) for x in linex]
+
+R2 = R_squared(y=y, predicted_y=liney)
 
 #-Testing: Plotting ----------------------------------------------------------#
 fig, ax = plt.subplots(1,2, figsize=(15, 8))
