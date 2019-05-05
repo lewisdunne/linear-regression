@@ -3,6 +3,14 @@ from scipy import stats
 import matplotlib.pyplot as plt
 
 #-Functions ------------------------------------------------------------------#
+def feature_normalise(X):
+    mu = np.mean(X, axis=0)
+    sigma = np.std(X, ddof=1, axis=0)
+    X = stats.zscore(X, ddof=1, axis=0)
+    
+    return X, mu, sigma
+
+
 def compute_cost(X, y, theta):
     m = len(y)
     h = np.dot(X, theta)
@@ -48,9 +56,7 @@ X, y = data[:, 0:2], data[:, -1] # Change this according to data dimensions.
 # Reshape y
 y = y.reshape(len(y), 1)
 # Normalise the features & get descriptives
-mu = np.mean(X, axis=0) # Need for scaling our later predictions
-sigma = np.std(X, ddof=1, axis=0) # Need for scaling our later predictions
-X = stats.zscore(X, axis=0, ddof=1)
+X, mu, sigma = feature_normalise(X)
 # Define some variables for the gradient descent function
 alpha = 0.01
 n_iters = 500
