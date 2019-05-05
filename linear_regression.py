@@ -65,7 +65,7 @@ n_features = np.size(X, 1)
 # Initialize theta
 theta = np.zeros((n_features, 1))
 # Run the grafient descent
-theta, J_history, theta_history = gradient_descent(X, y, theta)
+theta, J_history, theta_history = gradient_descent(X=X, y=y, theta=theta, alpha=alpha, n_iters=n_iters)
 # Make a plot
 plt.plot(J_history)
 plt.xlabel('Iteration Number')
