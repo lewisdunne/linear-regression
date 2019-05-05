@@ -1,99 +1,72 @@
-''' Example of linear regression solution '''
 import numpy as np
+from scipy import stats
 import matplotlib.pyplot as plt
-import seaborn as sns
-
-# Generate a fake dataset
-data_n = 1000
-data_mean = 0
-data_stdv = 1
-X = np.arange(1, data_n+1, 1)
-y = np.random.normal(data_mean, data_stdv, data_n)
-# Update y to give it a trend
-y = np.array([yi + Xi/500 for yi, Xi in zip(y, X)])
 
 #-Functions ------------------------------------------------------------------#
-def linear_regression(X, y):
-    """
-    Linear regression function:
-        Solves for β0 and β1
-    """
-    # Calculate means
-    Xbar, ybar = np.mean(X), np.mean(y) # All regression lines pass through Xbar, ybar
+def compute_cost(X, y, theta):
+    m = len(y)
+    h = np.dot(X, theta)
+    J = 1 / (2 * m) * np.sum(np.square(h-y))
     
-    # Solve for the slope (beta1)
-    X_err = X-Xbar # X errors
-    y_err = y-ybar # y errors
-    err_prod = X_err * y_err # product of X and y errors. This is the numerator
-    SSE_X = np.sum(X_err**2) # Sum of squared errors for X. This is the denominator
-    beta1 = sum(err_prod) / SSE_X # our beta1 coefficient (slope)
+    return J
+
+
+def gradient_descent(X, y, theta, alpha=0.01, n_iters=500):
+
+    m = len(y)
+    J_history = np.zeros((n_iters, 1))
+    theta_history = np.zeros((n_iters, len(theta)))
     
-    # Solve for the intercept (beta0)
-    # We know that y=ybar when X=Xbar, since all lines pass this intersection.
-    # Therefore beta0 is the difference between ybar and beta1.
-    beta0 = ybar - (beta1*Xbar)
+    for i in range(n_iters):
+        h = np.dot(X, theta)
+        error = h - y
+        
+        theta -= ((alpha / m) * np.dot(X.T, error))
+        
+        theta_history[i, :] = theta.T
+        
+        J_history[i] = compute_cost(X, y, theta)
     
-    return beta0, beta1
+    return theta, J_history, theta_history
 
-def regression(X, y):
-    '''
-    Vectorised solution for linear regression using the formula:
-        inverse(X'*X)*X'*y
-    '''
-    # Create a constant
-    constant = np.ones(len(X),1)
-    # Add the constant to the X input
-    Xmat = np.c_[constant, X]
-    # Solve beta parameters using vectorised regression equation
-    BETAS = np.linalg.inv(Xmat.T.dot(Xmat)).dot(Xmat.T).dot(y)
-    
-    return BETAS
 
-def predict_y(x, beta0, beta1):
-    """
-    Use params beta0 and beta1 to predict a hypothetical val of x.
-    """
-    y = beta0 + beta1 * x
-    return y
+def predict(x, mu, sigma, theta):
+    if type(x) == list:
+        x = [1] + x # Add an intercept
+    else:
+        x = [1] + [x] # Turn into a list and add intercept
+    print(x)
+    xnorm = np.concatenate((np.array([x[0]]), np.array((x[1:] - mu) / sigma)))
+    return np.dot(xnorm, theta)
 
-def R_squared(y, predicted_y):
-    '''Calculate R-squared variance explained'''
-    return np.sum((predicted_y-np.mean(y))**2) / np.sum((y-np.mean(y))**2)
 
-#-Testing: Calculating -------------------------------------------------------#
-# Call the func
-b0, b1 = linear_regression(X, y)
-
-# Make line
-max_pred = max(X)
-min_pred = min(X)
-linex = np.arange(min_pred, max_pred+1, 1) # x values
-liney = [predict_y(x, b0, b1) for x in linex]
-
-R2 = R_squared(y=y, predicted_y=liney)
-
-#-Testing: Plotting ----------------------------------------------------------#
-fig, ax = plt.subplots(1,2, figsize=(15, 8))
-
-ax[0].axvline(x=np.mean(X), lw=0.75, ls='dashed', c='gray', zorder=0)
-ax[0].axhline(y=np.mean(y), lw=0.75, ls='dashed', c='gray', zorder=0)
-
-ax[0].scatter(X, y, s=5, c='k')
-ax[0].plot(linex, liney, c='r', lw=2)
-ax[0].set_xlabel('x')
-ax[0].set_ylabel('y')
-ax[0].set_title('Manual Linear Reg.')
-
-# Check it against seaborn's regplot, which calculates regression automatically
-ax[1].axvline(x=np.mean(X), lw=0.75, ls='dashed', c='gray', zorder=0)
-ax[1].axhline(y=np.mean(y), lw=0.75, ls='dashed', c='gray', zorder=0)
-sns.regplot(X, y, ax=ax[1])
-
-ax[1].set_xlabel('x')
-ax[1].set_ylabel('y')
-ax[1].set_title('Seaborn\'s Linear Reg.')
-
-plt.suptitle('Linear Regression Example')
-plt.tight_layout()
+#-Run the example ------------------------------------------------------------#
+# Read the data using numpy
+data = np.genfromtxt('ex1data2.txt', delimiter=',')
+# Define which is the matrix of features `X`, and the labels vector `y`
+X, y = data[:, 0:2], data[:, -1] # Change this according to data dimensions.
+# Reshape y
+y = y.reshape(len(y), 1)
+# Normalise the features & get descriptives
+mu = np.mean(X, axis=0) # Need for scaling our later predictions
+sigma = np.std(X, ddof=1, axis=0) # Need for scaling our later predictions
+X = stats.zscore(X, axis=0, ddof=1)
+# Define some variables for the gradient descent function
+alpha = 0.01
+n_iters = 500
+# Add an intercept of ones to the matrix of features
+m = len(y) # get n cases
+X = np.c_[np.ones((m, 1)), X]
+# Calculate how many features
+n_features = np.size(X, 1)
+# Initialize theta
+theta = np.zeros((n_features, 1))
+# Run the grafient descent
+theta, J_history, theta_history = gradient_descent(X, y, theta)
+# Make a plot
+plt.plot(J_history)
+plt.xlabel('Iteration Number')
+plt.ylabel('Jθ')
 plt.show()
-#-----------------------------------------------------------------------------#
+# Predict y for X1 = 1650; X2 = 3 given theta  
+y_pred = predict(x=[1650, 3], mu=mu, sigma=sigma, theta=theta)
