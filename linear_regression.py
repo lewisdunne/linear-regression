@@ -28,11 +28,8 @@ def gradient_descent(X, y, theta, alpha=0.01, n_iters=500):
     for i in range(n_iters):
         h = np.dot(X, theta)
         error = h - y
-        
         theta -= ((alpha / m) * np.dot(X.T, error))
-        
         theta_history[i, :] = theta.T
-        
         J_history[i] = compute_cost(X, y, theta)
     
     return theta, J_history, theta_history
